@@ -41,12 +41,20 @@ class ScriptedGateway(PaymentGateway):
     """
 
     def __init__(self, results: list[PaymentResult]) -> None:
-        # TODO Day 3
-        raise NotImplementedError("Day 3: implement ScriptedGateway.__init__")
+       with self.invoice_repo.db.conn as conn:
+            self.results = results
+            self.index = 0
+
 
     def charge(self, invoice: Invoice) -> PaymentResult:
         # TODO Day 3
-        raise NotImplementedError("Day 3: implement ScriptedGateway.charge")
+        with self.invoice_repo.db.conn as conn:
+            if self.index < len(self.results):
+                result = self.results[self.index]
+                self.index += 1
+                return result
+            else:
+                raise ValueError("No more payment results available")"
 
 
 # ----------------------------------------------------------------
@@ -57,8 +65,20 @@ class FakeRandomGateway(PaymentGateway):
 
     def __init__(self, success_rate: float = 0.7, seed: Optional[int] = None) -> None:
         # TODO Day 3
-        raise NotImplementedError("Day 3: implement FakeRandomGateway.__init__")
+        with self.invoice_repo.db.conn as conn:
+            self.success_rate = success_rate
+            self.seed = seed
+            if seed is not None:
+                import random
+                random.seed(seed)
 
     def charge(self, invoice: Invoice) -> PaymentResult:
         # TODO Day 3
-        raise NotImplementedError("Day 3: implement FakeRandomGateway.charge")
+        with self.invoice_repo.db.conn as conn:
+            import random
+            if random.random() < self.success_rate:
+                return PaymentResult(success=True)
+            else:
+                return PaymentResult(success=False, failure_reason="RANDOM_FAILURE")
+
+   
